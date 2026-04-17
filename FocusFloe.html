@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Focus Floe — AI-Powered ADHD Planner</title>
+  <meta name="description" content="Focus Floe is the AI planner built for ADHD minds. Meet Kai, your personal assistant who understands how you think and helps you get things done." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── RESET & BASE ─── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #030b1a;
+      color: #e0e8f0;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+    button { border: none; background: none; cursor: pointer; font-family: inherit; }
+
+    /* ─── VARIABLES ─── */
+    :root {
+      --cyan: #00d9ff;
+      --cyan-dim: rgba(0, 217, 255, 0.15);
+      --cyan-glow: rgba(0, 217, 255, 0.08);
+      --navy-deep: #030b1a;
+      --navy-mid: #0a1628;
+      --white-90: rgba(255,255,255,0.9);
+      --white-70: rgba(255,255,255,0.7);
+      --white-50: rgba(255,255,255,0.5);
+      --white-40: rgba(255,255,255,0.4);
+      --white-30: rgba(255,255,255,0.3);
+      --white-20: rgba(255,255,255,0.2);
+      --white-10: rgba(255,255,255,0.1);
+      --white-05: rgba(255,255,255,0.05);
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --container: 1200px;
+    }
+
+    /* ─── UTILITIES ─── */
+    .container {
+      width: 100%;
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); border: 0;
+    }
+
+    /* ─── PAGE SECTIONS (show/hide) ─── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ─── NAVBAR ─── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(3, 11, 26, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--white-05);
+    }
+    .navbar-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 72px;
+    }
+    .navbar-brand {
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+    }
+    .navbar-brand img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+    .navbar-brand span {
+      font-family: var(--font-heading);
+      font-weight: 700; font-size: 1.25rem; color: white;
+    }
+    .navbar-links {
+      display: flex; align-items: center; gap: 2rem;
+      list-style: none;
+    }
+    .navbar-links a {
+      font-size: 0.875rem; color: var(--white-50);
+      transition: color 0.3s;
+    }
+    .navbar-links a:hover { color: var(--cyan); }
+    .navbar-cta {
+      display: inline-flex; padding: 0.5rem 1.5rem;
+      border-radius: 9999px; background: var(--cyan);
+      color: var(--navy-deep); font-weight: 700; font-size: 0.875rem;
+      transition: all 0.3s;
+    }
+    .navbar-cta:hover {
+      box-shadow: 0 0 30px rgba(0,217,255,0.35);
+      transform: scale(1.05);
+    }
+    .mobile-toggle {
+      display: none; color: white; font-size: 1.5rem;
+      cursor: pointer; padding: 0.5rem;
+    }
+    .mobile-menu {
+      display: none; position: fixed; top: 72px; left: 0; right: 0;
+      background: rgba(3,11,26,0.95); backdrop-filter: blur(20px);
+      padding: 1.5rem; border-bottom: 1px solid var(--white-05);
+    }
+    .mobile-menu.open { display: block; }
+    .mobile-menu a {
+      display: block; padding: 0.75rem 0; font-size: 1rem;
+      color: var(--white-50); border-bottom: 1px solid var(--white-05);
+    }
+    .mobile-menu a:hover { color: var(--cyan); }
+
+    @media (max-width: 768px) {
+      .navbar-links { display: none; }
+      .mobile-toggle { display: block; }
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+    }
+    .hero-bg img { width: 100%; height: 100%; object-fit: cover; }
+    .hero-bg-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(3,11,26,0.3), rgba(3,11,26,0.1) 50%, rgba(3,11,26,1));
+    }
+    .hero-spotlight {
+      position: absolute; top: 30%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px; height: 800px; border-radius: 50%;
+      background: var(--cyan-glow); filter: blur(120px);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative; padding-top: 10rem; padding-bottom: 5rem;
+    }
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.375rem 1rem; border-radius: 9999px;
+      border: 1px solid rgba(0,217,255,0.2);
+      background: rgba(0,217,255,0.05);
+      margin-bottom: 2rem;
+    }
+    .hero-badge svg { width: 14px; height: 14px; color: var(--cyan); }
+    .hero-badge span {
+      font-size: 0.75rem; font-weight: 500; color: var(--cyan);
+      letter-spacing: 0.05em;
+    }
+    .hero-title {
+      font-family: var(--font-heading);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800; line-height: 1.05; letter-spacing: -0.02em;
+      color: white;
+    }
+    .hero-title .gradient {
+      background: linear-gradient(to right, var(--cyan), #60a5fa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      margin-top: 1.5rem; font-size: 1.125rem;
+      color: var(--white-50); max-width: 480px; line-height: 1.7;
+    }
+    .hero-buttons {
+      display: flex; align-items: center; gap: 1rem;
+      margin-top: 2.5rem; flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 1rem 2rem; border-radius: 9999px;
+      background: var(--cyan); color: var(--navy-deep);
+      font-weight: 700; font-size: 1rem; transition: all 0.3s;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 40px rgba(0,217,255,0.35);
+      transform: scale(1.05);
+    }
+    .btn-secondary {
+      padding: 1rem 2rem; border-radius: 9999px;
+      border: 1px solid var(--white-10); color: var(--white-70);
+      font-weight: 500; font-size: 1rem; transition: all 0.3s;
+    }
+    .btn-secondary:hover {
+      border-color: rgba(0,217,255,0.3); color: var(--cyan);
+    }
+
+    /* Phone Frame */
+    .phone-area {
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .phone-glow {
+      position: absolute; inset: -3rem;
+      background: rgba(0,217,255,0.08); border-radius: 50%;
+      filter: blur(80px); pointer-events: none;
+    }
+    .phone-frame {
+      position: relative; width: 280px;
+      border-radius: 2.5rem; border: 3px solid var(--white-10);
+      background: rgba(0,0,0,0.8); padding: 0.5rem;
+      box-shadow: 0 0 80px rgba(0,217,255,0.15);
+    }
+    .phone-notch {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 7rem; height: 1.5rem; background: black;
+      border-radius: 0 0 1rem 1rem; z-index: 10;
+    }
+    .phone-screen {
+      border-radius: 2rem; overflow: hidden; background: black;
+    }
+    .phone-screen img { width: 100%; height: auto; }
+    .screenshot-dots {
+      display: flex; align-items: center; gap: 0.75rem; margin-top: 1.5rem;
+    }
+    .screenshot-dot {
+      width: 0.5rem; height: 0.5rem; border-radius: 9999px;
+      background: var(--white-20); transition: all 0.3s; cursor: pointer;
+    }
+    .screenshot-dot.active {
+      width: 2rem; background: var(--cyan);
+    }
+    .screenshot-label {
+      font-size: 0.75rem; color: var(--white-30);
+      margin-top: 0.75rem; letter-spacing: 0.05em;
+    }
+    .scroll-indicator {
+      position: absolute; bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s infinite;
+    }
+    .scroll-indicator svg { width: 24px; height: 24px; color: var(--white-20); }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    @media (max-width: 768px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; }
+      .hero-desc { margin-left: auto; margin-right: auto; }
+      .hero-buttons { justify-content: center; }
+      .phone-frame { width: 240px; }
+    }
+
+    /* ─── FEATURES ─── */
+    .features {
+      position: relative; padding: 6rem 0;
+    }
+    .features-bg {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+    }
+    .features-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+    .section-label {
+      font-size: 0.75rem; font-weight: 600; color: var(--cyan);
+      text-transform: uppercase; letter-spacing: 0.2em;
+      text-align: center; margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.75rem, 4vw, 3rem);
+      font-weight: 700; text-align: center;
+      letter-spacing: -0.02em; margin-bottom: 4rem;
+    }
+    .section-title .dim { color: var(--white-40); }
+    .features-grid {
+      position: relative;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+    }
+    .feature-card {
+      position: relative; padding: 2rem; border-radius: 1rem;
+      border: 1px solid var(--white-05);
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(8px);
+      transition: all 0.5s;
+    }
+    .feature-card:hover {
+      border-color: rgba(0,217,255,0.2);
+      background: rgba(255,255,255,0.04);
+    }
+    .feature-card-glow {
+      position: absolute; inset: 0; border-radius: 1rem;
+      background: rgba(0,217,255,0.05);
+      opacity: 0; transition: opacity 0.5s; pointer-events: none;
+    }
+    .feature-card:hover .feature-card-glow { opacity: 1; }
+    .feature-icon {
+      width: 3rem; height: 3rem; border-radius: 0.75rem;
+      background: rgba(0,217,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.25rem; transition: background 0.3s;
+    }
+    .feature-card:hover .feature-icon { background: rgba(0,217,255,0.15); }
+    .feature-icon svg { width: 22px; height: 22px; color: var(--cyan); }
+    .feature-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 0.75rem;
+    }
+    .feature-card p {
+      font-size: 0.875rem; color: var(--white-40); line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ─── APP SHOWCASE ─── */
+    .showcase {
+      position: relative; padding: 6rem 0; overflow: hidden;
+    }
+    .showcase-glow {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 1000px; height: 600px; border-radius: 50%;
+      background: rgba(0,217,255,0.03); filter: blur(150px);
+      pointer-events: none;
+    }
+    .showcase-grid {
+      position: relative;
+      display: flex; justify-content: center; gap: 2rem;
+      overflow-x: auto; padding-bottom: 1rem;
+    }
+    .showcase-item {
+      flex-shrink: 0; display: flex; flex-direction: column;
+      align-items: center;
+    }
+    .showcase-phone {
+      position: relative; width: 200px;
+    }
+    .showcase-phone-inner {
+      border-radius: 1.8rem; border: 2px solid var(--white-10);
+      background: rgba(0,0,0,0.8); padding: 0.375rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      transition: border-color 0.5s;
+    }
+    .showcase-item:hover .showcase-phone-inner {
+      border-color: rgba(0,217,255,0.2);
+    }
+    .showcase-phone-screen {
+      border-radius: 1.5rem; overflow: hidden; background: black;
+    }
+    .showcase-phone-screen img { width: 100%; height: auto; }
+    .showcase-phone-glow {
+      position: absolute; inset: -1rem;
+      background: rgba(0,217,255,0.05); border-radius: 2rem;
+      opacity: 0; filter: blur(20px);
+      transition: opacity 0.5s; pointer-events: none;
+    }
+    .showcase-item:hover .showcase-phone-glow { opacity: 1; }
+    .showcase-label {
+      font-size: 0.75rem; color: var(--white-30);
+      margin-top: 1rem; letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 768px) {
+      .showcase-grid { gap: 1rem; }
+      .showcase-phone { width: 160px; }
+    }
+
+    /* ─── MEET KAI ─── */
+    .kai {
+      position: relative; padding: 6rem 0;
+    }
+    .kai-spotlight {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px; border-radius: 50%;
+      background: rgba(0,217,255,0.05); filter: blur(100px);
+      pointer-events: none;
+    }
+    .kai-content {
+      position: relative; max-width: 48rem; margin: 0 auto; text-align: center;
+    }
+    .kai-cards {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; margin-top: 3rem;
+    }
+    .kai-card {
+      padding: 1.5rem; border-radius: 0.75rem;
+      border: 1px solid var(--white-05);
+      background: rgba(255,255,255,0.02);
+    }
+    .kai-card h4 {
+      font-family: var(--font-heading);
+      font-size: 0.875rem; font-weight: 600; color: var(--cyan);
+      margin-bottom: 0.5rem;
+    }
+    .kai-card p { font-size: 0.75rem; color: var(--white-40); line-height: 1.5; }
+
+    @media (max-width: 768px) {
+      .kai-cards { grid-template-columns: 1fr; }
+    }
+
+    /* ─── DOWNLOAD CTA ─── */
+    .cta {
+      position: relative; padding: 6rem 0;
+    }
+    .cta-glow {
+      position: absolute; bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 400px; border-radius: 50%;
+      background: rgba(0,217,255,0.08); filter: blur(120px);
+      pointer-events: none;
+    }
+    .cta-content {
+      position: relative; text-align: center; max-width: 40rem; margin: 0 auto;
+    }
+    .cta-note {
+      margin-top: 1.5rem; font-size: 0.75rem; color: var(--white-20);
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      position: relative; border-top: 1px solid var(--white-05);
+    }
+    .footer-glow {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 33%; height: 1px;
+      background: linear-gradient(to right, transparent, rgba(0,217,255,0.4), transparent);
+    }
+    .footer-inner { padding: 4rem 0; }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem;
+    }
+    .footer-brand-desc {
+      font-size: 0.875rem; color: var(--white-50);
+      line-height: 1.6; max-width: 24rem; margin-top: 1.25rem;
+    }
+    .footer-ai-note {
+      font-size: 0.75rem; color: var(--white-30); margin-top: 1.5rem;
+    }
+    .footer-heading {
+      font-size: 0.75rem; font-weight: 600; color: var(--white-40);
+      text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1.25rem;
+    }
+    .footer-link {
+      display: block; font-size: 0.875rem; color: var(--white-50);
+      padding: 0.375rem 0; transition: color 0.3s;
+    }
+    .footer-link:hover { color: var(--cyan); }
+    .footer-bottom {
+      margin-top: 4rem; padding-top: 2rem;
+      border-top: 1px solid var(--white-05);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-bottom p { font-size: 0.75rem; color: var(--white-30); }
+    .footer-bottom .tagline { color: var(--white-20); }
+
+    @media (max-width: 768px) {
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
+
+    /* ─── LEGAL PAGES ─── */
+    .legal-page {
+      padding-top: 8rem; padding-bottom: 4rem;
+    }
+    .legal-page h1 {
+      font-family: var(--font-heading);
+      font-size: 2.5rem; font-weight: 800; color: white;
+      margin-bottom: 0.5rem;
+    }
+    .legal-page .updated {
+      font-size: 0.875rem; color: var(--white-30); margin-bottom: 3rem;
+    }
+    .legal-page h2 {
+      font-family: var(--font-heading);
+      font-size: 1.5rem; font-weight: 700; color: white;
+      margin-top: 2.5rem; margin-bottom: 1rem;
+    }
+    .legal-page p, .legal-page li {
+      font-size: 0.9375rem; color: var(--white-50);
+      line-height: 1.8; margin-bottom: 1rem;
+    }
+    .legal-page ul {
+      padding-left: 1.5rem; margin-bottom: 1rem;
+    }
+    .legal-page a { color: var(--cyan); }
+    .legal-page a:hover { text-decoration: underline; }
+
+    /* ─── CONTACT PAGE ─── */
+    .contact-page { padding-top: 8rem; padding-bottom: 4rem; }
+    .contact-page h1 {
+      font-family: var(--font-heading);
+      font-size: 2.5rem; font-weight: 800; color: white;
+      margin-bottom: 0.5rem;
+    }
+    .contact-page .subtitle {
+      font-size: 1rem; color: var(--white-50); margin-bottom: 3rem;
+    }
+    .contact-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+    }
+    .contact-form { display: flex; flex-direction: column; gap: 1.25rem; }
+    .form-group label {
+      display: block; font-size: 0.875rem; font-weight: 500;
+      color: var(--white-70); margin-bottom: 0.5rem;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 0.75rem 1rem;
+      border-radius: 0.75rem; border: 1px solid var(--white-10);
+      background: rgba(255,255,255,0.03); color: white;
+      font-family: var(--font-body); font-size: 0.9375rem;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none; border-color: rgba(0,217,255,0.4);
+    }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .contact-info-card {
+      padding: 1.5rem; border-radius: 1rem;
+      border: 1px solid var(--white-05);
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 1rem;
+    }
+    .contact-info-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1rem; font-weight: 600; color: white; margin-bottom: 0.5rem;
+    }
+    .contact-info-card p {
+      font-size: 0.875rem; color: var(--white-50); line-height: 1.6;
+    }
+    .contact-info-card a { color: var(--cyan); }
+
+    @media (max-width: 768px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── ANIMATIONS ─── */
+    .fade-up {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.8s cubic-bezier(0,0,0.2,1), transform 0.8s cubic-bezier(0,0,0.2,1);
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════ NAVBAR ═══════ -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <div class="navbar-brand" onclick="showPage('home')">
+        <img src="./logo.png" alt="Focus Floe" />
+        <span>Focus Floe</span>
+      </div>
+      <ul class="navbar-links">
+        <li><a href="#" onclick="showPage('home'); scrollToSection('features'); return false;">Features</a></li>
+        <li><a href="#" onclick="showPage('home'); scrollToSection('kai'); return false;">Meet Kai</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" class="navbar-cta">Download</a></li>
+      </ul>
+      <button class="mobile-toggle" onclick="toggleMobile()" aria-label="Menu">&#9776;</button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#" onclick="showPage('home'); scrollToSection('features'); closeMobile(); return false;">Features</a>
+      <a href="#" onclick="showPage('home'); scrollToSection('kai'); closeMobile(); return false;">Meet Kai</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/contact">Contact</a>
+      <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);font-weight:700;">Download on App Store</a>
+    </div>
+  </nav>
+
+  <!-- ═══════ HOME PAGE ═══════ -->
+  <div id="page-home" class="page active">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg">
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663283603974/k33LQzRD2uYiNpebysdE7F/hero_bg-6WtFGUdnLE4R9BfFHVEC5Z.webp" alt="" />
+        <div class="hero-bg-overlay"></div>
+      </div>
+      <div class="hero-spotlight"></div>
+
+      <div class="container hero-content">
+        <div class="hero-grid">
+          <div>
+            <div class="hero-badge fade-up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/></svg>
+              <span>AI-Powered ADHD Planner</span>
+            </div>
+            <h1 class="hero-title fade-up">
+              Find Your<br /><span class="gradient">Flow State</span>
+            </h1>
+            <p class="hero-desc fade-up">
+              Focus Floe is the AI planner built for ADHD minds. Meet Kai, your personal assistant who understands how you think and helps you get things done.
+            </p>
+            <div class="hero-buttons fade-up">
+              <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" class="btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                Download on App Store
+              </a>
+              <button class="btn-secondary" onclick="scrollToSection('features')">Learn More</button>
+            </div>
+          </div>
+
+          <div class="phone-area">
+            <div style="position:relative;">
+              <div class="phone-glow"></div>
+              <div class="phone-frame" id="heroPhone">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                  <img id="heroScreenshot" src="https://d2xsxph8kpxj0f.cloudfront.net/310519663283603974/k33LQzRD2uYiNpebysdE7F/screenshot_insights_522e2274.webp" alt="Focus Floe App" />
+                </div>
+              </div>
+            </div>
+            <div class="screenshot-dots" id="screenshotDots"></div>
+            <p class="screenshot-label" id="screenshotLabel">Weekly Insights</p>
+          </div>
+        </div>
+
+        <div class="scroll-indicator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+      <div class="features-bg">
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663283603974/k33LQzRD2uYiNpebysdE7F/features_glow-MVQeS5DpiiryfXwEzxqetN.webp" alt="" />
+      </div>
+      <div class="container" style="position:relative;">
+        <p class="section-label fade-up">Features</p>
+        <h2 class="section-title fade-up">
+          Designed for How<br /><span class="dim">Your Brain Works</span>
+        </h2>
+        <div class="features-grid" id="featuresGrid"></div>
+      </div>
+    </section>
+
+    <!-- APP SHOWCASE -->
+    <section class="showcase">
+      <div class="showcase-glow"></div>
+      <div class="container" style="position:relative;">
+        <p class="section-label fade-up">App Preview</p>
+        <h2 class="section-title fade-up">
+          See Focus Floe<br /><span class="dim">In Action</span>
+        </h2>
+        <div class="showcase-grid" id="showcaseGrid"></div>
+      </div>
+    </section>
+
+    <!-- MEET KAI -->
+    <section class="kai" id="kai">
+      <div class="kai-spotlight"></div>
+      <div class="container">
+        <div class="kai-content">
+          <div class="hero-badge fade-up" style="justify-content:center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span>Your AI Companion</span>
+          </div>
+          <h2 class="section-title fade-up" style="margin-bottom:1.5rem;">
+            Meet <span class="gradient" style="background:linear-gradient(to right,var(--cyan),#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Kai</span>
+          </h2>
+          <p class="fade-up" style="font-size:1.125rem;color:var(--white-50);line-height:1.7;margin-bottom:2rem;">
+            Kai is more than a chatbot. Kai is an AI companion that learns your patterns, understands your energy cycles, and provides personalized suggestions to help you navigate your day. From breaking down overwhelming tasks to celebrating your wins, Kai is always in your corner.
+          </p>
+          <div class="kai-cards fade-up">
+            <div class="kai-card">
+              <h4>Smart Scheduling</h4>
+              <p>Suggests optimal times based on your energy</p>
+            </div>
+            <div class="kai-card">
+              <h4>Task Breakdown</h4>
+              <p>Splits big tasks into manageable steps</p>
+            </div>
+            <div class="kai-card">
+              <h4>Gentle Nudges</h4>
+              <p>Keeps you on track without pressure</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOWNLOAD CTA -->
+    <section class="cta" id="download">
+      <div class="cta-glow"></div>
+      <div class="container">
+        <div class="cta-content">
+          <h2 class="section-title fade-up" style="margin-bottom:1.5rem;">Ready to Find<br />Your Flow?</h2>
+          <p class="fade-up" style="font-size:1.125rem;color:var(--white-50);line-height:1.7;margin-bottom:2.5rem;">
+            Download Focus Floe and start your journey to calmer, more productive days. Your brain works differently — your planner should too.
+          </p>
+          <div class="fade-up">
+            <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" class="btn-primary" style="font-size:1.125rem;padding:1.25rem 2.5rem;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              Download on App Store
+            </a>
+          </div>
+          <p class="cta-note fade-up">Available on iOS 17 and later. Free with optional premium features.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════ CONTACT PAGE ═══════ -->
+  <div id="page-contact" class="page">
+    <div class="container contact-page">
+      <h1>Contact Us</h1>
+      <p class="subtitle">Have a question, suggestion, or just want to say hello? We'd love to hear from you.</p>
+
+      <div class="contact-grid">
+        <form class="contact-form" onsubmit="handleContactSubmit(event)">
+          <div class="form-group">
+            <label for="contact-name">Name</label>
+            <input type="text" id="contact-name" placeholder="Your name" required />
+          </div>
+          <div class="form-group">
+            <label for="contact-email">Email</label>
+            <input type="email" id="contact-email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="contact-subject">Subject</label>
+            <input type="text" id="contact-subject" placeholder="What's this about?" required />
+          </div>
+          <div class="form-group">
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" placeholder="Tell us more..." required></textarea>
+          </div>
+          <button type="submit" class="btn-primary" style="justify-content:center;">Send Message</button>
+        </form>
+
+        <div>
+          <div class="contact-info-card">
+            <h3>Email</h3>
+            <p><a href="mailto:support@focusfloe.com">support@focusfloe.com</a></p>
+          </div>
+          <div class="contact-info-card">
+            <h3>Response Time</h3>
+            <p>We typically respond within 24 hours during business days.</p>
+          </div>
+          <div class="contact-info-card">
+            <h3>Bug Reports</h3>
+            <p>Found a bug? Please include your device model, iOS version, and steps to reproduce the issue.</p>
+          </div>
+          <div class="contact-info-card">
+            <h3>Feature Requests</h3>
+            <p>We love hearing your ideas! Tell us what would make Focus Floe even better for you.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ FOOTER (always visible) ═══════ -->
+  <footer class="footer">
+    <div class="footer-glow"></div>
+    <div class="container footer-inner">
+      <div class="footer-grid">
+        <div>
+          <div class="navbar-brand" onclick="showPage('home')" style="margin-bottom:0;">
+            <img src="./logo.png" alt="Focus Floe" />
+            <span>Focus Floe</span>
+          </div>
+          <p class="footer-brand-desc">An AI-powered ADHD planner designed to help you find your flow state. Built with empathy, powered by Kai.</p>
+          <p class="footer-ai-note">AI-powered insights are for guidance only and may be inaccurate; please verify critical health or task data.</p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Legal</h4>
+          <a href="/terms" class="footer-link">Terms of Service</a>
+          <a href="/privacy" class="footer-link">Privacy Policy</a>
+          <a href="/contact" class="footer-link">Contact Us</a>
+        </div>
+        <div>
+          <h4 class="footer-heading">Download</h4>
+          <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" class="footer-link">App Store</a>
+          <a href="mailto:support@focusfloe.com" class="footer-link">support@focusfloe.com</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Focus Floe. All rights reserved.</p>
+        <p class="tagline">Designed for minds that move differently.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ─── DATA ─── */
+    const screenshots = [
+      { src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663283603974/k33LQzRD2uYiNpebysdE7F/screenshot_insights_522e2274.webp", label: "Weekly Insights" },
+      { src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663283603974/k33LQzRD2uYiNpebysdE7F/screenshot_me_hub_c168e7f5.webp", label: "Focus Hub" },
+      { src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663283603974/k33LQzRD2uYiNpebysdE7F/screenshot_me_profile_42d7c965.webp", label: "Profile & Achievements" },
+      { src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663283603974/k33LQzRD2uYiNpebysdE7F/screenshot_new_task_44f40d4f.webp", label: "New Task" },
+    ];
+
+    const features = [
+      { icon: '<path d="M12 2a9 9 0 0 0-9 9c0 3.6 2.4 6.6 5.5 7.7.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1.1-2.7-1.1-.4-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.3.7.1-.5.3-.9.5-1.1-1.8-.2-3.7-.9-3.7-4 0-.9.3-1.6.8-2.2-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.4 7.4 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.2 0 3.1-1.9 3.8-3.7 4 .3.3.6.8.6 1.6v2.4c0 .2.1.5.6.4A9 9 0 0 0 12 2z"/>', title: "AI-Powered Planning", desc: "Kai analyzes your energy patterns and suggests optimal task scheduling for your unique ADHD brain." },
+      { icon: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>', title: "Focus Timer", desc: "Customizable Pomodoro sessions with ambient soundscapes designed to help you enter and maintain flow state." },
+      { icon: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>', title: "Daily & Weekly Floe", desc: "Visual timeline views that break your day into manageable blocks, reducing overwhelm and decision fatigue." },
+      { icon: '<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>', title: "Kai Insights", desc: "Your AI companion provides real-time suggestions, celebrates wins, and gently nudges you when tasks drift." },
+      { icon: '<path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.4 2 5 2c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.4 2 5 2c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>', title: "Flow State Tracking", desc: "Track your productive sessions and discover when you naturally enter flow. Build on your strengths." },
+      { icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', title: "Privacy First", desc: "Your data stays on your device. No tracking, no selling. Just a tool that respects your mind and your privacy." },
+    ];
+
+    /* ─── SCREENSHOT CAROUSEL ─── */
+    let activeScreenshot = 0;
+    let carouselInterval;
+
+    function renderDots() {
+      const dotsEl = document.getElementById('screenshotDots');
+      dotsEl.innerHTML = '';
+      screenshots.forEach((s, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'screenshot-dot' + (i === activeScreenshot ? ' active' : '');
+        dot.setAttribute('aria-label', 'View ' + s.label);
+        dot.onclick = () => { activeScreenshot = i; updateCarousel(); resetInterval(); };
+        dotsEl.appendChild(dot);
+      });
+    }
+
+    function updateCarousel() {
+      const img = document.getElementById('heroScreenshot');
+      const label = document.getElementById('screenshotLabel');
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = screenshots[activeScreenshot].src;
+        img.alt = screenshots[activeScreenshot].label;
+        label.textContent = screenshots[activeScreenshot].label;
+        img.style.opacity = '1';
+        renderDots();
+      }, 250);
+    }
+
+    function resetInterval() {
+      clearInterval(carouselInterval);
+      carouselInterval = setInterval(() => {
+        activeScreenshot = (activeScreenshot + 1) % screenshots.length;
+        updateCarousel();
+      }, 4000);
+    }
+
+    /* ─── FEATURES GRID ─── */
+    function renderFeatures() {
+      const grid = document.getElementById('featuresGrid');
+      features.forEach(f => {
+        grid.innerHTML += `
+          <div class="feature-card fade-up">
+            <div class="feature-card-glow"></div>
+            <div style="position:relative;">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${f.icon}</svg>
+              </div>
+              <h3>${f.title}</h3>
+              <p>${f.desc}</p>
+            </div>
+          </div>`;
+      });
+    }
+
+    /* ─── SHOWCASE GRID ─── */
+    function renderShowcase() {
+      const grid = document.getElementById('showcaseGrid');
+      screenshots.forEach(s => {
+        grid.innerHTML += `
+          <div class="showcase-item fade-up">
+            <div class="showcase-phone">
+              <div class="showcase-phone-glow"></div>
+              <div class="showcase-phone-inner">
+                <div class="showcase-phone-screen">
+                  <img src="${s.src}" alt="${s.label}" />
+                </div>
+              </div>
+            </div>
+            <p class="showcase-label">${s.label}</p>
+          </div>`;
+      });
+    }
+
+    /* ─── PAGE NAVIGATION ─── */
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById('page-' + pageId);
+      if (target) target.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function scrollToSection(sectionId) {
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+
+    /* ─── MOBILE MENU ─── */
+    function toggleMobile() {
+      document.getElementById('mobileMenu').classList.toggle('open');
+    }
+    function closeMobile() {
+      document.getElementById('mobileMenu').classList.remove('open');
+    }
+
+    /* ─── CONTACT FORM ─── */
+    function handleContactSubmit(e) {
+      e.preventDefault();
+      alert('Thank you for your message! We will get back to you within 24 hours.');
+      e.target.reset();
+    }
+
+    /* ─── SCROLL ANIMATIONS ─── */
+    function initScrollAnimations() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '-40px' });
+
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    }
+
+    /* ─── INIT ─── */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Route /privacy, /terms, /contact to their embedded pages
+      const path = window.location.pathname.replace(/\/$/, '');
+      const legalRoutes = { '/privacy': ['lp-privacy', 'Privacy Policy — Focus Floe'], '/terms': ['lp-terms', 'Terms of Use — Focus Floe'], '/contact': ['lp-contact', 'Contact & Support — Focus Floe'] };
+      if (legalRoutes[path]) {
+        document.getElementById('page-home').style.display = 'none';
+        document.getElementById(legalRoutes[path][0]).style.display = 'block';
+        document.title = legalRoutes[path][1];
+        return;
+      }
+
+      const heroImg = document.getElementById('heroScreenshot');
+      heroImg.style.transition = 'opacity 0.25s ease';
+
+      renderDots();
+      renderFeatures();
+      renderShowcase();
+      resetInterval();
+
+      // Re-observe after dynamic content
+      setTimeout(initScrollAnimations, 100);
+    });
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════
+       PRIVACY POLICY PAGE
+  ═══════════════════════════════════════════════════ -->
+  <div id="lp-privacy" style="display:none;">
+    <style>
+      .lp-navbar { position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(3,11,26,0.92);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.06); }
+      .lp-nav-inner { max-width:760px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;height:68px;gap:1rem; }
+      .lp-brand { font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;text-decoration:none; }
+      .lp-brand span { color:#00D9FF; }
+      .lp-back { margin-left:auto;font-size:.85rem;color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.06);padding:.375rem 1rem;border-radius:9999px;text-decoration:none;transition:all .2s; }
+      .lp-back:hover { color:#00D9FF;border-color:rgba(0,217,255,.3); }
+      .lp-page { max-width:760px;margin:0 auto;padding:7rem 1.5rem 5rem; }
+      .lp-badge { display:inline-flex;align-items:center;gap:.5rem;padding:.3rem .9rem;border-radius:9999px;border:1px solid rgba(0,217,255,.15);background:rgba(0,217,255,.04);font-size:.75rem;font-weight:600;color:#00D9FF;letter-spacing:.04em;margin-bottom:1.25rem; }
+      .lp-title { font-family:'Outfit',sans-serif;font-size:clamp(2rem,5vw,3rem);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:1rem; }
+      .lp-title span { background:linear-gradient(135deg,#00D9FF,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+      .lp-meta { font-size:.875rem;color:rgba(255,255,255,.4); }
+      .lp-divider { border:none;border-top:1px solid rgba(255,255,255,.06);margin:2.5rem 0; }
+      .lp-card { background:#0d1f3c;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem; }
+      .lp-card h2 { font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:.75rem; }
+      .lp-card p,.lp-section p { margin-bottom:1rem;font-size:.9375rem;color:rgba(255,255,255,.65);line-height:1.75; }
+      .lp-card ul,.lp-section ul { list-style:none;margin-bottom:1rem; }
+      .lp-card ul li,.lp-section ul li { padding:.3rem 0 .3rem 1.25rem;position:relative;font-size:.9375rem;color:rgba(255,255,255,.65); }
+      .lp-card ul li::before,.lp-section ul li::before { content:'';position:absolute;left:0;top:.75rem;width:5px;height:5px;border-radius:50%;background:#00D9FF; }
+      .lp-section { margin-bottom:2.5rem; }
+      .lp-section h2 { font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:.75rem; }
+      .lp-footer { margin-top:4rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,.06);text-align:center;font-size:.8125rem;color:rgba(255,255,255,.4); }
+      .lp-footer a { color:rgba(255,255,255,.4);margin:0 .75rem;text-decoration:none; }
+      .lp-footer a:hover { color:#00D9FF; }
+      a.lp-link { color:#00D9FF; }
+    </style>
+    <nav class="lp-navbar">
+      <div class="lp-nav-inner">
+        <a href="/" class="lp-brand">Focus <span>Floe</span></a>
+        <a href="/" class="lp-back">← Back to Home</a>
+      </div>
+    </nav>
+    <main class="lp-page">
+      <div class="page-hero">
+        <div class="lp-badge">Legal</div>
+        <h1 class="lp-title">Privacy <span>Policy</span></h1>
+        <p class="lp-meta">Effective date: April 14, 2026 &nbsp;·&nbsp; Last updated: April 14, 2026</p>
+      </div>
+      <hr class="lp-divider" />
+      <div class="lp-section"><p>Focus Floe ("we", "our", or "us"), operated by Softvary, is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use the Focus Floe: AI ADHD Planner app ("App"). By using the App, you agree to the collection and use of information as described in this policy.</p></div>
+      <div class="lp-card"><h2>1. Information We Collect</h2><ul><li><strong>Account Information:</strong> Name, email address, and authentication data when you sign in with Apple, Google, or email.</li><li><strong>Usage Data:</strong> Task data, focus session durations, mood logs, and app interactions stored locally on your device.</li><li><strong>Device Data:</strong> Device type, operating system version, and crash reports for debugging purposes.</li><li><strong>Purchase Data:</strong> Subscription status managed through Apple's StoreKit. We do not store your payment information.</li><li><strong>Voice Input:</strong> Processed on-device using Apple's Speech Recognition. Not transmitted to our servers.</li></ul></div>
+      <div class="lp-card"><h2>2. How We Use Your Information</h2><ul><li>To provide and maintain the App and its features.</li><li>To personalise your AI planning experience through Kai.</li><li>To manage your subscription and verify your Pro status.</li><li>To improve the App through anonymised analytics.</li><li>To respond to support requests or feedback submissions.</li></ul></div>
+      <div class="lp-card"><h2>3. Data Storage & Security</h2><p>Your task data and personal settings are stored locally on your device using SwiftData. We use Firebase Authentication to securely manage sign-in sessions. We do not sell, trade, or rent your personal information to third parties.</p></div>
+      <div class="lp-card"><h2>4. Third-Party Services</h2><ul><li><strong>Firebase (Google):</strong> Authentication and analytics.</li><li><strong>OpenAI API:</strong> Powers Kai AI task breakdown. Prompts may be sent to OpenAI servers. Do not include sensitive information in task titles.</li><li><strong>Apple StoreKit:</strong> In-app purchase and subscription management.</li></ul></div>
+      <div class="lp-card"><h2>5. Children's Privacy</h2><p>Focus Floe is not directed to children under 13. We do not knowingly collect personal information from children under 13.</p></div>
+      <div class="lp-card"><h2>6. Your Rights</h2><ul><li>Access the personal data we hold about you.</li><li>Request deletion of your account and associated data.</li><li>Manage or cancel your subscription through your Apple ID settings.</li></ul><p>To request data deletion, contact us at <a class="lp-link" href="mailto:support@focusfloe.com">support@focusfloe.com</a>.</p></div>
+      <div class="lp-card"><h2>7. Changes to This Policy</h2><p>We may update this Privacy Policy from time to time. Continued use of the App after changes constitutes your acceptance of the updated policy.</p></div>
+      <div class="lp-section"><h2>8. Contact Us</h2><ul><li>Email: <a class="lp-link" href="mailto:support@focusfloe.com">support@focusfloe.com</a></li><li>Website: <a class="lp-link" href="https://www.focusfloe.com">www.focusfloe.com</a></li><li>Developer: Softvary</li></ul></div>
+      <div class="lp-footer"><p>© 2026 Softvary. All rights reserved.</p><p style="margin-top:.75rem;"><a href="/">Home</a><a href="/terms">Terms of Use</a><a href="mailto:support@focusfloe.com">Contact</a></p></div>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       TERMS OF USE PAGE
+  ═══════════════════════════════════════════════════ -->
+  <div id="lp-terms" style="display:none;">
+    <nav class="lp-navbar">
+      <div class="lp-nav-inner">
+        <a href="/" class="lp-brand">Focus <span>Floe</span></a>
+        <a href="/" class="lp-back">← Back to Home</a>
+      </div>
+    </nav>
+    <main class="lp-page">
+      <div class="page-hero">
+        <div class="lp-badge">Legal</div>
+        <h1 class="lp-title">Terms of <span>Use</span></h1>
+        <p class="lp-meta">Effective date: April 14, 2026 &nbsp;·&nbsp; Last updated: April 14, 2026</p>
+      </div>
+      <hr class="lp-divider" />
+      <div class="lp-card"><h2>1. Acceptance of Terms</h2><p>These Terms govern your use of Focus Floe: AI ADHD Planner ("App"), developed by Softvary. By accessing or using the App, you confirm you are at least 13 years of age and agree to these Terms in full.</p></div>
+      <div class="lp-card"><h2>2. License to Use</h2><p>We grant you a limited, non-exclusive, non-transferable, revocable licence to use the App for personal, non-commercial purposes. You may not copy, modify, distribute, reverse engineer, or sell the App or its content.</p></div>
+      <div class="lp-card"><h2>3. Subscriptions & Billing</h2><p>Focus Floe offers auto-renewable subscriptions through Apple's App Store:</p><ul><li><strong>Focus Floe Premium (Yearly):</strong> $49.99/year — includes a 3-day free trial.</li><li><strong>Focus Floe Premium (Monthly):</strong> $5.99/month.</li></ul><p>Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period. You can manage and cancel anytime in your Apple ID account settings. No refunds for partial periods.</p></div>
+      <div class="lp-card"><h2>4. AI Features (Kai)</h2><p>Kai is an AI planning assistant for productivity only — not medical or therapeutic advice. AI-generated content may occasionally be inaccurate. Task prompts may be processed via OpenAI servers. Do not include sensitive personal information in task titles.</p></div>
+      <div class="lp-card"><h2>5. User Responsibilities</h2><ul><li>Maintain the confidentiality of your account credentials.</li><li>Ensure any information you provide is accurate and up to date.</li><li>Use the App in compliance with all applicable laws.</li></ul></div>
+      <div class="lp-card"><h2>6. Intellectual Property</h2><p>All content, design, and features of the App — including Kai, branding, and the Focus Floe name — are the exclusive property of Softvary and protected by applicable intellectual property laws.</p></div>
+      <div class="lp-card"><h2>7. Disclaimer of Warranties</h2><p>The App is provided "as is" without warranties of any kind. Focus Floe is a productivity tool and is not a substitute for professional medical or psychological advice for ADHD or any other condition.</p></div>
+      <div class="lp-card"><h2>8. Limitation of Liability</h2><p>To the fullest extent permitted by law, Softvary shall not be liable for any indirect, incidental, or consequential damages arising from your use of the App.</p></div>
+      <div class="lp-card"><h2>9. Changes to Terms</h2><p>We may update these Terms from time to time. Continued use of the App after changes constitutes your acceptance of the revised Terms.</p></div>
+      <div class="lp-section"><h2>10. Contact Us</h2><ul><li>Email: <a class="lp-link" href="mailto:support@focusfloe.com">support@focusfloe.com</a></li><li>Website: <a class="lp-link" href="https://www.focusfloe.com">www.focusfloe.com</a></li><li>Developer: Softvary</li></ul></div>
+      <div class="lp-footer"><p>© 2026 Softvary. All rights reserved.</p><p style="margin-top:.75rem;"><a href="/">Home</a><a href="/privacy">Privacy Policy</a><a href="/contact">Contact</a></p></div>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       CONTACT & SUPPORT PAGE
+  ═══════════════════════════════════════════════════ -->
+  <div id="lp-contact" style="display:none;">
+    <nav class="lp-navbar">
+      <div class="lp-nav-inner">
+        <a href="/" class="lp-brand">Focus <span>Floe</span></a>
+        <a href="/" class="lp-back">← Back to Home</a>
+      </div>
+    </nav>
+    <main class="lp-page">
+      <div class="lp-hero">
+        <div class="lp-badge">Support</div>
+        <h1 class="lp-title">Contact <span>&amp; Support</span></h1>
+        <p class="lp-meta">We're here to help. Reach out and we'll get back to you as soon as possible.</p>
+      </div>
+      <hr class="lp-divider" />
+
+      <div class="lp-card">
+        <h2>Get in Touch</h2>
+        <p>For any questions, feedback, bug reports, or support requests, email us directly:</p>
+        <p style="margin-top:1rem;">
+          <a class="lp-link" href="mailto:focusfloe@gmail.com" style="font-size:1.05rem;font-weight:600;">focusfloe@gmail.com</a>
+        </p>
+        <p style="margin-top:0.75rem;">We typically respond within 1–2 business days.</p>
+      </div>
+
+      <div class="lp-card">
+        <h2>Account &amp; Subscription</h2>
+        <ul>
+          <li>To cancel your subscription, go to <strong>iPhone Settings → Apple ID → Subscriptions → Focus Floe</strong>.</li>
+          <li>To request a refund, contact Apple Support at <a class="lp-link" href="https://reportaproblem.apple.com" target="_blank">reportaproblem.apple.com</a>.</li>
+          <li>To delete your account and data, email us at <a class="lp-link" href="mailto:focusfloe@gmail.com">focusfloe@gmail.com</a> with subject "Delete My Account".</li>
+        </ul>
+      </div>
+
+      <div class="lp-card">
+        <h2>Bug Reports &amp; Feedback</h2>
+        <p>Found a bug or have a feature request? We'd love to hear from you. Email us at <a class="lp-link" href="mailto:focusfloe@gmail.com">focusfloe@gmail.com</a> with a description of the issue and your device model.</p>
+      </div>
+
+      <div class="lp-card">
+        <h2>About Focus Floe</h2>
+        <ul>
+          <li>Developer: Softvary</li>
+          <li>Website: <a class="lp-link" href="https://www.focusfloe.com">www.focusfloe.com</a></li>
+          <li>Email: <a class="lp-link" href="mailto:focusfloe@gmail.com">focusfloe@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="lp-footer">
+        <p>© 2026 Softvary. All rights reserved.</p>
+        <p style="margin-top:.75rem;">
+          <a href="/">Home</a>
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Use</a>
+        </p>
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>
